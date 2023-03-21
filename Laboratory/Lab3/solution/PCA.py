@@ -113,7 +113,7 @@ if __name__ == '__main__':
    
    # DP = PCA_not_optimized(D,2)
    # DP = PCA(D,2)
-    DP = PCA(D,2)
+    DP = PCA2(D,2)
     
     draw_scatter(DP, L)
     
