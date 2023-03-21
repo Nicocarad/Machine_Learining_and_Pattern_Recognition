@@ -1,5 +1,4 @@
 import numpy as np
-import matplotlib
 import matplotlib.pyplot as plt
 
 
@@ -14,83 +13,16 @@ def vrow(array):
     return array.reshape((1,array.size))
 
 
+# this data are imported from the iris dataset of sklearn library
 
-# LOADING DATA #
-def load_data(file_name):
+def load_data():
 
-    data_list = []
-    label_list = []
-
-    # create a dictionary to map the assigned class in the dataset to numerical values
-    labels = {
-        'Iris-setosa': 0,
-        'Iris-versicolor': 1,
-        'Iris-virginica': 2
-    }
-
-# open the file, the "with" sintax also close the file without specifying it
-    with open(file_name) as dataset:
-        for line in dataset:
-            attr = []
-            try:
-                
-                line_list = line.split(",")
-                attributes = line_list[0:4]
-                name = line_list[-1].strip()
-                for i in attributes:
-                    
-                    attr.append(float(i))
-                
-                col_array = vcol(np.array(attr))
-                data_list.append(col_array)
-                
-                label_list.append(labels[name])
-            except:
-                pass
-
-    
-    return np.hstack(data_list), np.array(label_list, dtype=np.int32)
-
+    # The dataset is already available in the sklearn library (pay attention that the library represents samples as row vectors, not column vectors - we need to transpose the data matrix)
+    import sklearn.datasets
+    return sklearn.datasets.load_iris()['data'].T, sklearn.datasets.load_iris()['target'] # target is the label
 
 
 # VISUALIZE DATA
-
-def plot_hist(matrix, label):
-
-    
-    mask0 = (label == 0)
-    mask1 = (label == 1)
-    mask2 = (label == 2)
-
-
-    D0 = matrix[:, mask0]
-    D1 = matrix[:, mask1]  
-    D2 = matrix[:, mask2]  
-
-    attributes = {
-        0: 'Sepal length',
-        1: 'Sepal width',
-        2: 'Petal length',
-        3: 'Petal width'
-    }
-
-    for index in range(4):
-
-        plt.figure(index)
-        plt.xlabel(attributes[index])
-
-        plt.hist(D0[index, :], bins=10, density=True,
-                 alpha=0.7, label='Setosa')
-        plt.hist(D1[index, :], bins=10, density=True,
-                 alpha=0.7, label='Versicolor')
-        plt.hist(D2[index, :], bins=10, density=True,
-                 alpha=0.7, label='Virginica')
-
-        plt.legend()
-        plt.tight_layout()  
-        plt.savefig('images/histograms/%s.pdf' % attributes[index])
-
-    plt.show()
 
 
 def plot_scatter(matrix, label):
@@ -130,31 +62,32 @@ def plot_scatter(matrix, label):
 
 
 
-
-def meanCalc(data_matrix):
-   
-    mu = 0
-    # iterate through each column of the data_matrix
-    for i in range(data_matrix.shape[1]):
-        # take a slice of the matrix with all rows for the ith column, which is a column vector
-        # add the column vector to mu to keep track of the sum of each respective column
-        mu = mu + data_matrix[:, i:i+1]
-        
-    # calculate the mean vector by dividing the sum vector by the number of columns or samples (data_matrix.shape[1])
-    mu = mu / float(data_matrix.shape[1]) 
+def PCA(data_matrix):
     
-    # return the mean vector as output
-    return mu
-
-
-def covarianceCalc(data_matrix,mu):
+    # CALCULATE MEAN
+    sum = 0
+    number_of_column = data_matrix.shape[1] # shape[1] takes the dimension "1" so the columns and calculate the total number 
+    for i in range(number_of_column):
+        
+        sum = sum + data_matrix[:, i:i+1] #sum is a new array containing the same number of rows of data_matrix and only one colum containing the sum of the element of each column of data_matrix
+        
+    mu = sum / float(number_of_column) # the mean vector contains the mean value for each attribute (sepal length (cm),sepal width (cm), petal length (cm), petal width (cm))
+    print("This is the mean vector:\n", mu)
+    
+    # CALCULATE COVARIANCE MATRIX
     C = 0
-    for i in range(data_matrix.shape[1]):
+    for i in range(number_of_column):
         C = C + np.dot(data_matrix[:, i:i+1] - mu, (data_matrix[:, i:i+1] - mu).T)
-    C = C / float(data_matrix.shape[1])
-    return C
-
-
+    C = C / float(number_of_column)
+    print("This is the Covariance matrix:\n", C)
+    
+    
+    # COMPUTE THE EIGENVALUES AND EIGENVECTORS OF THE COVARIANCE MATRIX
+    s, U = np.linalg.eigh(C)  # s contains the eigenvalues sorted from the smallest to largest and U contains the corresponding eigenvectors
+    print("This is the Eigenvalues Matrix:\n", s)
+    print("This is the Covariance matrix:\n", C)
+    
+    
 
 
 
@@ -165,10 +98,6 @@ if __name__ == '__main__':
     plt.rc('xtick', labelsize=16)
     plt.rc('ytick', labelsize=16)
 
-    D, L = load_data('iris.csv')
-    # plot_hist(D, L)
-    # plot_scatter(D, L)
-    mean = meanCalc(D)
-    Cov_matrix = covarianceCalc(D,mean)
-    print(mean)
-    print(Cov_matrix)
+    D, L = load_data()
+   
+    PCA(D)
