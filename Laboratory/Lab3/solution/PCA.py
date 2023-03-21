@@ -22,47 +22,8 @@ def load_data():
     return sklearn.datasets.load_iris()['data'].T, sklearn.datasets.load_iris()['target'] # target is the label
 
 
-# VISUALIZE DATA
 
-
-def plot_scatter(matrix, label):
-
-    mask0 = (label == 0)
-    mask1 = (label == 1)
-    mask2 = (label == 2)
-
-    D0 = matrix[:, mask0] 
-    D1 = matrix[:, mask1] 
-    D2 = matrix[:, mask2]  
-
-    attributes = {
-        0: 'Sepal length',
-        1: 'Sepal width',
-        2: 'Petal length',
-        3: 'Petal width'
-    }
-
-    for x in range(4):
-        for y in range(4):
-            if x == y:
-                continue
-            plt.figure()
-            plt.xlabel(attributes[x])
-            plt.ylabel(attributes[y])
-            plt.scatter(D0[x, :], D0[y, :], alpha=0.7, marker="o", label='Setosa')
-            plt.scatter(D1[x, :], D1[y, :], alpha=0.7, marker="^", label='Versicolor')
-            plt.scatter(D2[x, :], D2[y, :], alpha=0.7, marker="s", label='Virginica')
-
-            plt.legend()
-            plt.tight_layout()  
-            plt.savefig('images/scatterPlots/scatter_%s_%s.pdf' %
-                        (attributes[x], attributes[y]))
-        plt.show()
-
-
-
-
-def PCA(data_matrix):
+def PCA_not_optimized(data_matrix,m):
     
     # CALCULATE MEAN
     sum = 0
@@ -85,10 +46,60 @@ def PCA(data_matrix):
     # COMPUTE THE EIGENVALUES AND EIGENVECTORS OF THE COVARIANCE MATRIX
     s, U = np.linalg.eigh(C)  # s contains the eigenvalues sorted from the smallest to largest and U contains the corresponding eigenvectors
     print("This is the Eigenvalues Matrix:\n", s)
-    print("This is the Covariance matrix:\n", C)
+    print("This is the Eigenvectors Matrix:\n", U)
     
+    # COMPUTE THE P MATRIX
     
+    P = U[:, ::-1][:, 0:m]
+    
+    # PROJECTION OF POINTS
+        
+    DP = np.dot(P.T, D)
+    
+    return DP
+    
+def PCA(data_matrix,m):
+    
+    N = data_matrix.shape[1]
+    mu = vcol(data_matrix.mean(1))
+    DC = data_matrix - mu
+    C = np.dot(DC, DC.T)/N
+    s, U = np.linalg.eigh(C)
+    P = U[:, ::-1][:, 0:m]
+    DP = np.dot(P.T, D)
+    return DP
+    
+def PCA2(data_matrix,m):
+    
+    N = data_matrix.shape[1]
+    mu = vcol(data_matrix.mean(1))
+    DC = data_matrix - mu
+    C = np.dot(DC, DC.T)/N
+    U,_,_ = np.linalg.svd(C)
+    P = U[:, 0:m]
+    DP = np.dot(P.T, D)
+    return DP  
+ 
+def draw_scatter(matrix, label):
+    
+    mask0 = (label == 0)
+    mask1 = (label == 1)
+    mask2 = (label == 2)
 
+    D0 = matrix[:, mask0] 
+    D1 = matrix[:, mask1] 
+    D2 = matrix[:, mask2]
+    
+    plt.figure()
+    plt.scatter(D0[0, :], D0[1, :], alpha=0.7, marker="o", label='Setosa')
+    plt.scatter(D1[0, :], D1[1, :], alpha=0.7, marker="^", label='Versicolor')
+    plt.scatter(D2[0, :], D2[1, :], alpha=0.7, marker="s", label='Virginica')
+
+    plt.legend()
+    plt.tight_layout()  
+    plt.savefig('PCA_scatter_plot.pdf')
+    plt.show()
+    
 
 
 if __name__ == '__main__':
@@ -100,4 +111,10 @@ if __name__ == '__main__':
 
     D, L = load_data()
    
-    PCA(D)
+   # DP = PCA_not_optimized(D,2)
+   # DP = PCA(D,2)
+    DP = PCA(D,2)
+    
+    draw_scatter(DP, L)
+    
+    
