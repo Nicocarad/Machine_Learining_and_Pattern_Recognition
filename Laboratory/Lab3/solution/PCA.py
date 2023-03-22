@@ -64,9 +64,9 @@ def PCA(data_matrix,m):
     mu = vcol(data_matrix.mean(1)) # data_matrix.mean(1) return a 1-D array so we must transform it into a column
     DC = data_matrix - mu  # performing broadcast, we are removing from all the data the mean
     C = np.dot(DC, DC.T)/N
-    s, U = np.linalg.eigh(C)
-    P = U[:, ::-1][:, 0:m]
-    DP = np.dot(P.T, D)
+    s, U = np.linalg.eigh(C) # compute the eigenvalues and eigenvectors
+    P = U[:, ::-1][:, 0:m] # reverse the matrix in order to move leading eigenvectors in the first "m" column
+    DP = np.dot(P.T, D) #apply projection of points
     return DP
     
 def PCA2(data_matrix,m):
