@@ -75,9 +75,9 @@ def PCA2(data_matrix,m):
     mu = vcol(data_matrix.mean(1))
     DC = data_matrix - mu
     C = np.dot(DC, DC.T)/N
-    U,_,_ = np.linalg.svd(C)
-    P = U[:, 0:m]
-    DP = np.dot(P.T, D)
+    U,_,_ = np.linalg.svd(C) # compute the eigenvectors by performing the Single Value Decomposition
+    P = U[:, 0:m]  # filter all rows and the column from 0 to m-1 ( extract only the first m column)
+    DP = np.dot(P.T, D) # projection of data
     return DP  
  
 def draw_scatter(matrix, label):
