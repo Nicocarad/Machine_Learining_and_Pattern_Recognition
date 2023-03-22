@@ -60,9 +60,9 @@ def PCA_not_optimized(data_matrix,m):
     
 def PCA(data_matrix,m):
     
-    N = data_matrix.shape[1]
-    mu = vcol(data_matrix.mean(1))
-    DC = data_matrix - mu
+    N = data_matrix.shape[1] # number of samples
+    mu = vcol(data_matrix.mean(1)) # data_matrix.mean(1) return a 1-D array so we must transform it into a column
+    DC = data_matrix - mu  # performing broadcast, we are removing from all the data the mean
     C = np.dot(DC, DC.T)/N
     s, U = np.linalg.eigh(C)
     P = U[:, ::-1][:, 0:m]
