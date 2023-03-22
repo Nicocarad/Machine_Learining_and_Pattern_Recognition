@@ -19,8 +19,8 @@ def load_data():
 
     # The dataset is already available in the sklearn library (pay attention that the library represents samples as row vectors, not column vectors - we need to transpose the data matrix)
     import sklearn.datasets
-    return sklearn.datasets.load_iris()['data'].T, sklearn.datasets.load_iris()['target'] # target is the label
-
+    data = sklearn.datasets.load_iris()['data']
+    return data.T, sklearn.datasets.load_iris()['target']
 
 
 def PCA_not_optimized(data_matrix,m):
