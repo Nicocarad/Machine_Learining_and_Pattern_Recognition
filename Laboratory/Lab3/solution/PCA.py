@@ -113,7 +113,7 @@ if __name__ == '__main__':
    
    # DP = PCA_not_optimized(D,2)
    # DP = PCA(D,2)
-    DP = PCA2(D,2)
+    DP = PCA2(D,2) # reduce the dimension of the dataset to 2 ( currently is 4 because 4 attributes are considered in the iris dataset)
     
     draw_scatter(DP, L)
     
