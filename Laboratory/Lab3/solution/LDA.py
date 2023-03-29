@@ -22,27 +22,20 @@ def load_data():
     data = sklearn.datasets.load_iris()['data']
     return data.T, sklearn.datasets.load_iris()['target']
 
-def between_class_matrix(matrix, n_classes, L):
-    
-    # calculate the dataset mean
-    mu_dataset = 0
-    N = matrix.shape[1] # number of samples
-    for i in range(n_classes+1):
-        mu_dataset = mu_dataset + matrix[:, L==i].mean(1)
-    mu_dataset = mu_dataset/N
-    
-    
-    
-    
-    return
 
-
-    
-def class_mean(class_matrix):
-    
-    nc = class_matrix.shape[1] #number of sample of class "i"
-    class_mean = class_matrix.mean(1)
-    return class_mean
+def SbSw (matrix, label):
+    Sb = 0 # initialize the between class cov. matrix
+    Sw = 0 # initialize the within class cov.matrix
+    mu = vcol(matrix.mean(1)) # dataset mean
+    nc = D_c.shape[1]
+    N = matrix.shape[1]
+    for i in range(label.max()+1):
+        D_c = matrix[:, label == i] # filter the matrix data according to the label (0,1,2)
+        mu_c = vcol(D_c.mean(1)) # calc a column vector containing the mean of the attributes (sepal-length, petal-width ...) for one class at a time
+        Sb = Sb + nc*np.dot((mu_c - mu),(mu_c - mu).T)
+    Sb = Sb / N
+        
+    return Sb
 
 
 
@@ -54,5 +47,6 @@ if __name__ == '__main__':
     plt.rc('ytick', labelsize=16)
 
     D, L = load_data()
-   
+    S = SbSw(D,L)
+    
     
