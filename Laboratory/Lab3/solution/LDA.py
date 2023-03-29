@@ -50,21 +50,22 @@ def Sw_c(D_c):
     Sw_c = np.dot(DC, DC.T)/nc
     return Sw_c
 
-
+# GENERALIZED EIGENVALUE PROBLEM
 def LDA1(matrix,label,m):
     Sb,Sw = SbSw(matrix,label)
     s, U = scipy.linalg.eigh(Sb, Sw)
     W = U[:, ::-1][:, 0:m] # reverse the eigenvectors and then retrive the first m
     return W
 
-#def LDA2(matrix, label, m):
+# EIG. PROB. SOLVED BY JOINT DIAGONALIZATION
+def LDA2(matrix, label, m):
     Sb,Sw = SbSw(matrix,label)
     #whiten transformation(see slide)
-    s, U_w = scipy.linalg.eigh(Sb, Sw)
+    U_w, s, _ = np.linalg.svd(Sw)
     P1 = np.dot(U_w * vrow(1.0/(s**0.5)), U_w.T)
     # diagonalization of Sb
     SBTilde = np.dot(P1, np.dot(Sb,P1.T))
-    U_b,_,_ = np.linlag.svd(SBTilde)
+    U_b,_,_ = np.linalg.svd(SBTilde)
     P2 = U_b[:, 0:m]
     W = np.dot(P1.T, P2)
     return W
@@ -89,6 +90,7 @@ def draw_scatter(matrix, label):
     plt.savefig('LDA_scatter_plot.pdf')
     plt.show()
 
+
 if __name__ == '__main__':
 
     # Change default font size - comment to use default values
@@ -98,10 +100,11 @@ if __name__ == '__main__':
 
     D, L = load_data()
     
-    W1 = LDA1(D,L,2)
+    W1 = LDA1(D,L,2) # m = 2 because at most n_classes - 1
     y1 = np.dot(W1.T, D)
-   # W2 = LDA2(D,L,2)
-    #y2 = np.dot(W2.T, D)
+    W2 = LDA2(D,L,2)
+    y2 = np.dot(W2.T, D)
     draw_scatter(y1,L)
-    #draw_scatter(y2,L)
+    draw_scatter(y2,L)
+    print(np.linalg.svd(np.hstack([W1, W2]))[1]) # only m=2 value are different from zero so it means that W1 and W2 are linearly dependent
     
