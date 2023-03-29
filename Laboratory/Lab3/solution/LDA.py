@@ -29,7 +29,7 @@ def SbSw (matrix, label):
     Sw = 0 # initialize the within class cov. matrix
     mu = vcol(matrix.mean(1)) # dataset mean
     N = matrix.shape[1]
-    for i in range(label.max()+1):
+    for i in range(label.max()+1): # in "label" there are only 0,1,2 element so the max will be 2
         D_c = matrix[:, label == i] # filter the matrix data according to the label (0,1,2)
         nc = D_c.shape[1] # number of sample in class "c"
         mu_c = vcol(D_c.mean(1)) # calc a column vector containing the mean of the attributes (sepal-length, petal-width ...) for one class at a time
