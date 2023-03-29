@@ -1,4 +1,5 @@
 import numpy as np
+import scipy.linalg
 import matplotlib.pyplot as plt
 
 
@@ -25,19 +26,68 @@ def load_data():
 
 def SbSw (matrix, label):
     Sb = 0 # initialize the between class cov. matrix
-    Sw = 0 # initialize the within class cov.matrix
+    Sw = 0 # initialize the within class cov. matrix
     mu = vcol(matrix.mean(1)) # dataset mean
-    nc = D_c.shape[1]
     N = matrix.shape[1]
     for i in range(label.max()+1):
         D_c = matrix[:, label == i] # filter the matrix data according to the label (0,1,2)
+        nc = D_c.shape[1] # number of sample in class "c"
         mu_c = vcol(D_c.mean(1)) # calc a column vector containing the mean of the attributes (sepal-length, petal-width ...) for one class at a time
         Sb = Sb + nc*np.dot((mu_c - mu),(mu_c - mu).T)
+        Sw = Sw + nc*Sw_c(D_c) # calculate the within covariance matrix as a weighted sum of the cov matrix of the classes
     Sb = Sb / N
+    Sw = Sw / N
         
-    return Sb
+    return Sb, Sw
 
 
+# calculate the covariance matrix for a class "c"
+def Sw_c(D_c): 
+    Sw_c = 0
+    nc = D_c.shape[1] 
+    mu_c = vcol(D_c.mean(1)) 
+    DC = D_c - mu_c  
+    Sw_c = np.dot(DC, DC.T)/nc
+    return Sw_c
+
+
+def LDA1(matrix,label,m):
+    Sb,Sw = SbSw(matrix,label)
+    s, U = scipy.linalg.eigh(Sb, Sw)
+    W = U[:, ::-1][:, 0:m] # reverse the eigenvectors and then retrive the first m
+    return W
+
+#def LDA2(matrix, label, m):
+    Sb,Sw = SbSw(matrix,label)
+    #whiten transformation(see slide)
+    s, U_w = scipy.linalg.eigh(Sb, Sw)
+    P1 = np.dot(U_w * vrow(1.0/(s**0.5)), U_w.T)
+    # diagonalization of Sb
+    SBTilde = np.dot(P1, np.dot(Sb,P1.T))
+    U_b,_,_ = np.linlag.svd(SBTilde)
+    P2 = U_b[:, 0:m]
+    W = np.dot(P1.T, P2)
+    return W
+    
+def draw_scatter(matrix, label):
+    
+    mask0 = (label == 0)
+    mask1 = (label == 1)
+    mask2 = (label == 2)
+
+    D0 = matrix[:, mask0] 
+    D1 = matrix[:, mask1] 
+    D2 = matrix[:, mask2]
+    
+    plt.figure()
+    plt.scatter(D0[0, :], D0[1, :], alpha=0.7, marker="o", label='Setosa')
+    plt.scatter(D1[0, :], D1[1, :], alpha=0.7, marker="^", label='Versicolor')
+    plt.scatter(D2[0, :], D2[1, :], alpha=0.7, marker="s", label='Virginica')
+
+    plt.legend()
+    plt.tight_layout()  
+    plt.savefig('LDA_scatter_plot.pdf')
+    plt.show()
 
 if __name__ == '__main__':
 
@@ -47,6 +97,11 @@ if __name__ == '__main__':
     plt.rc('ytick', labelsize=16)
 
     D, L = load_data()
-    S = SbSw(D,L)
     
+    W1 = LDA1(D,L,2)
+    y1 = np.dot(W1.T, D)
+   # W2 = LDA2(D,L,2)
+    #y2 = np.dot(W2.T, D)
+    draw_scatter(y1,L)
+    #draw_scatter(y2,L)
     
