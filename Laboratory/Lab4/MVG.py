@@ -12,16 +12,17 @@ def logpdf_GAU_ND(X,mu,C):
     
     C_inv = np.linalg.inv(C) # compute the inverse of the Covariance matrix
     _,det_log_C = np.linalg.slogdet(C) # compute the determinant og log|C| ( the det is the second parameter of the function)
-    M = C.shape[1]
-    for i in range (X.shape[1]):
-        X_c = X[i] - mu
-        MVG = -M*0.5*np.log(2*np.pi)-0.5*np.log(det_log_C)
-        temp = np.dot(X_c.T,C_inv)
-        temp1 = -0.5*X_c.dot(temp)
-        MVG = MVG + temp1
-        Y = np.hstack(MVG)
+    M = C.shape[0]
+    X_c = X - mu
+    MVG = -M*0.5*np.log(2*np.pi)-0.5*np.log(det_log_C)
+    temp = np.dot(C_inv,X_c)
+    temp1 = -0.5*(X_c.T).dot(temp)
+    MVG = MVG + temp1
+   
+        
+        
     
-    return Y
+    return MVG
     
     
 
