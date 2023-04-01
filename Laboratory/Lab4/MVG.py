@@ -8,11 +8,14 @@ def vrow(array):
 def vcol(array):
     return array.reshape((array.size, 1))
 
+# X is a column vector
+# mu is a colum vector 4x1
+# C is the Covariance matrix 4x4
 def logpdf_GAU_ND(X,mu,C): 
     
     C_inv = np.linalg.inv(C) # compute the inverse of the Covariance matrix
     _,det_log_C = np.linalg.slogdet(C) # compute the determinant og log|C| ( the det is the second parameter of the function)
-    M = C.shape[0]
+    M = X.shape[0]
     X_c = X - mu
     MVG = -M*0.5*np.log(2*np.pi)-0.5*np.log(det_log_C)
     temp = np.dot(C_inv,X_c)
