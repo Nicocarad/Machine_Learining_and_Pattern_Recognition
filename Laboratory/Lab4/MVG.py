@@ -41,6 +41,7 @@ if __name__ == '__main__':
     C = np.ones((1,1)) * 2.0
     plt.plot(XPlot.ravel(), np.exp(logpdf_GAU_ND(vrow(XPlot), m, C)))
     plt.show()
+    plt.savefig("images/One_dimensional_MVG.pdf")
  
     pdfSol = np.load('utils/llGAU.npy')
     pdfGau = logpdf_GAU_ND(vrow(XPlot), m, C)
