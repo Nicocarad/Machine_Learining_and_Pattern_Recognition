@@ -22,13 +22,14 @@ def logpdf_GAU_ND_1Sample(x,mu,C):
    
     return MVG
     
-
+# considering X a M X N matrix
 def logpdf_GAU_ND(X, mu, C):
     
     Y = []
     for i in range(X.shape[1]):
         Y.append(logpdf_GAU_ND_1Sample(X[:, i:i+1], mu, C))
     return np.array(Y).ravel()
+# return an array of MVG
     
 
 if __name__ == '__main__':
