@@ -9,35 +9,33 @@ def loglikelihood(XND, m_ML, C_ML):
     ll = np.sum(MVG)
  
     return ll
+
+def compute_loglikelihood(data_matrix):
     
+    N = data_matrix.shape[1]
+    mu = vcol(data_matrix.mean(1)) 
+    DC = data_matrix - mu 
+    C = np.dot(DC, DC.T)/N
+    ll = loglikelihood(data_matrix, mu, C)
+    
+    return ll,mu,C
   
     
 if __name__ == '__main__':
     
     #  LIKELIHOOD ESTIMATE FOR A GENERIC MATRIX
-    data_matrix = np.load("utils/XND.npy")
-    N = data_matrix.shape[1] # number of samples
-    mu = vcol(data_matrix.mean(1)) # data_matrix.mean(1) return a 1-D array so we must transform it into a column
-    DC = data_matrix - mu  # performing broadcast, we are removing from all the data the mean
-    C = np.dot(DC, DC.T)/N
-
-    ll = loglikelihood(data_matrix, mu, C)
-    print(ll)
-    
-    # LIKELIHOOD FOR ONE DIMENSIONAL SAMPLES
+    XND = np.load("utils/XND.npy")
+    ll1 = compute_loglikelihood(XND)[0]
+    print(ll1)
+     # LIKELIHOOD FOR ONE DIMENSIONAL SAMPLES
     X1D = np.load('utils/X1D.npy')
-    print("out")
-    print(X1D)
-    N = X1D.shape[1] 
-    mu = vcol(X1D.mean(1)) 
-    DC = X1D - mu  
-    C = np.dot(DC, DC.T)/N
-
-    ll = loglikelihood(X1D, mu, C)
+    ll2,mu,C = compute_loglikelihood(X1D)
+    print(ll2)
+    
     plt.figure()
     plt.hist(X1D.ravel(), bins=50, density=True)
     XPlot = np.linspace(-8, 12, 1000)
     plt.plot(XPlot.ravel(), np.exp(logpdf_GAU_ND(vrow(XPlot), mu, C)))
     plt.show()
     plt.savefig("images/One_dimension_MLE.pdf")
-    print(ll)
+   
