@@ -14,6 +14,7 @@ def loglikelihood(XND, m_ML, C_ML):
     
 if __name__ == '__main__':
     
+    #  LIKELIHOOD ESTIMATE FOR A GENERIC MATRIX
     data_matrix = np.load("utils/XND.npy")
     N = data_matrix.shape[1] # number of samples
     mu = vcol(data_matrix.mean(1)) # data_matrix.mean(1) return a 1-D array so we must transform it into a column
@@ -23,10 +24,13 @@ if __name__ == '__main__':
     ll = loglikelihood(data_matrix, mu, C)
     print(ll)
     
+    # LIKELIHOOD FOR ONE DIMENSIONAL SAMPLES
     X1D = np.load('utils/X1D.npy')
-    N = X1D.shape[1] # number of samples
-    mu = vcol(X1D.mean(1)) # data_matrix.mean(1) return a 1-D array so we must transform it into a column
-    DC = X1D - mu  # performing broadcast, we are removing from all the data the mean
+    print("out")
+    print(X1D)
+    N = X1D.shape[1] 
+    mu = vcol(X1D.mean(1)) 
+    DC = X1D - mu  
     C = np.dot(DC, DC.T)/N
 
     ll = loglikelihood(X1D, mu, C)
