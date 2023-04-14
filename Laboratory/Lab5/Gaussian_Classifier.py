@@ -28,7 +28,7 @@ def split_db_2to1(D, L, seed=0):
 def mean_and_covariance(D,L):
     
     for i in range(L.max()+1):
-        D_c = D[:,L == i]
+        D_c = D[:,L == i] # this D_c is not DTR because we took the column randomly
         N_c = D_c.shape[1]
         mu_c = vcol(D_c.mean(1))
         DC = D_c - mu_c 
