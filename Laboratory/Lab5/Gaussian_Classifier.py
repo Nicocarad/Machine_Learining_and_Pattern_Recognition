@@ -28,7 +28,7 @@ def split_db_2to1(D, L, seed=0):
 def mean_and_covariance(D,L):
     
     for i in range(L.max()+1):
-        D_c = D[:,L == i] # this D_c is not DTR because we took the column randomly
+        D_c = D[:,L == i] 
         N_c = D_c.shape[1]
         mu_c = vcol(D_c.mean(1))
         DC = D_c - mu_c 
@@ -48,6 +48,6 @@ if __name__ == '__main__':
     
     D,L = load_iris()
     (DTR, LTR),(DTE,LTE) = split_db_2to1(D,L)
-    mean_and_covariance(D,L)
+    mean_and_covariance(DTR,LTR)
     
     
