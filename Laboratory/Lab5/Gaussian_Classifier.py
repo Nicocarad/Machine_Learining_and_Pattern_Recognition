@@ -37,7 +37,7 @@ def mean_and_covariance(data_matrix):
 def GaussianClassifier(D,L):
     
     S = []
-    
+
     for i in range(L.max()+1):
         D_c = D[:,L == i] 
         mu,C = mean_and_covariance(D_c)
@@ -46,7 +46,10 @@ def GaussianClassifier(D,L):
     S = np.vstack(S)
     print(S.shape) # check inf score matrix is n_classes*n_test_sample
     
-    
+    prior = np.ones(S.shape)/3.0 # create a matrix n_classes*n_test_sample
+    # prior = lib.vrow(np.ones(3)/3.0) works too since broadcasting is performed in the following line
+    prova = S*prior
+    print(prova)
         
 
     return 
