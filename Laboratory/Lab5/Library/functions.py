@@ -7,6 +7,13 @@ def vrow(array):
 def vcol(array):
     return array.reshape((array.size, 1))
 
+def mean_and_covariance(data_matrix):
+    N = data_matrix.shape[1]
+    mu = vcol(data_matrix.mean(1)) 
+    DC = data_matrix - mu 
+    C = np.dot(DC, DC.T)/N
+    
+    return mu, C
 
 def logpdf_GAU_ND_fast(X, mu, C):
     
