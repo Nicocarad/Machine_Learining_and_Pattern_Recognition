@@ -48,8 +48,8 @@ def GaussianClassifier(D,L):
     
     prior = np.ones(S.shape)/3.0 # create a matrix n_classes*n_test_sample
     # prior = lib.vrow(np.ones(3)/3.0) works too since broadcasting is performed in the following line
-    prova = S*prior
-    print(prova)
+    SJoint = S*prior
+    
         
 
     return 
