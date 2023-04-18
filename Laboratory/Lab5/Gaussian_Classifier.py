@@ -1,5 +1,6 @@
 import numpy as np
 import sklearn.datasets
+import Library.functions as lib
 
 def vcol(array):
     return array.reshape((array.size, 1))
@@ -24,19 +25,27 @@ def split_db_2to1(D, L, seed=0):
     LTE = L[idxTest]
     return (DTR, LTR), (DTE, LTE)
 
+def mean_and_covariance(data_matrix):
+    N = data_matrix.shape[1]
+    mu = vcol(data_matrix.mean(1)) 
+    DC = data_matrix - mu 
+    C = np.dot(DC, DC.T)/N
+    
+    return mu, C
+    
 
-def mean_and_covariance(D,L):
+def GaussianClassifier(D,L):
+    
+    S = []
     
     for i in range(L.max()+1):
         D_c = D[:,L == i] 
-        N_c = D_c.shape[1]
-        mu_c = vcol(D_c.mean(1))
-        DC = D_c - mu_c 
-        C_c = np.dot(DC, DC.T)/N_c
-        print("Mean class:", i)
-        print(mu_c) 
-        print("Covariance matrix class:", i)
-        print(C_c)
+        mu,C = mean_and_covariance(D_c)
+        f_conditional = lib.logpdf_GAU_ND_fast(D_c, mu, C)
+        S.append(lib.vrow(f_conditional))
+    
+    np.vstack(S)
+        
         
     
     return 
@@ -48,6 +57,6 @@ if __name__ == '__main__':
     
     D,L = load_iris()
     (DTR, LTR),(DTE,LTE) = split_db_2to1(D,L)
-    mean_and_covariance(DTR,LTR)
+    GaussianClassifier(DTR,LTR)
     
     
