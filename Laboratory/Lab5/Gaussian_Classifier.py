@@ -41,17 +41,21 @@ def GaussianClassifier(D,L):
     for i in range(L.max()+1):
         D_c = D[:,L == i] 
         mu,C = mean_and_covariance(D_c)
-        f_conditional = lib.logpdf_GAU_ND_fast(D, mu, C)
+        f_conditional = np.exp(lib.logpdf_GAU_ND_fast(D, mu, C))
         S.append(lib.vrow(f_conditional))
     S = np.vstack(S)
-    print(S.shape) # check inf score matrix is n_classes*n_test_sample
+    #print(S.shape) # check inf score matrix is n_classes*n_test_sample
     
     prior = np.ones(S.shape)/3.0 # create a matrix n_classes*n_test_sample
     # prior = lib.vrow(np.ones(3)/3.0) works too since broadcasting is performed in the following line
     SJoint = S*prior
+    SMarginal = lib.vrow(SJoint.sum(0))
+    SPost = SJoint/SMarginal
+    print(SPost.shape)
     
-        
-
+    Predicted_labels = np.argmax(SPost,0)
+    print(Predicted_labels)
+    
     return 
     
     
