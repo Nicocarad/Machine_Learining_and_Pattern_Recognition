@@ -1,6 +1,8 @@
 import numpy as np
+import scipy
 import sklearn.datasets
 import Library.functions as lib
+import Library.GaussClassifier as GAU
 
 def vcol(array):
     return array.reshape((array.size, 1))
@@ -34,37 +36,71 @@ def mean_and_covariance(data_matrix):
     return mu, C
     
 
-def GaussianClassifier(D,L):
+def GaussianClassifier(DTR,LTR,DTE,LTE):
     
     S = []
 
-    for i in range(L.max()+1):
-        D_c = D[:,L == i] 
+    for i in range(LTR.max()+1):
+        D_c = DTR[:,LTR == i] 
         mu,C = mean_and_covariance(D_c)
-        f_conditional = np.exp(lib.logpdf_GAU_ND_fast(D, mu, C))
+        f_conditional = np.exp(lib.logpdf_GAU_ND_fast(DTE, mu, C))
         S.append(lib.vrow(f_conditional))
     S = np.vstack(S)
+    
     #print(S.shape) # check inf score matrix is n_classes*n_test_sample
     
     prior = np.ones(S.shape)/3.0 # create a matrix n_classes*n_test_sample
-    # prior = lib.vrow(np.ones(3)/3.0) works too since broadcasting is performed in the following line
+    # prior = lib.vcol(np.ones(3)/3.0) works too since broadcasting is performed in the following line
     SJoint = S*prior
     SMarginal = lib.vrow(SJoint.sum(0))
     SPost = SJoint/SMarginal
-    print(SPost.shape)
     
-    Predicted_labels = np.argmax(SPost,0)
-    print(Predicted_labels)
+    Predicted_labels = np.argmax(SPost,0) # checks value in the column and return the index of the highest ( so the label )
+    result = np.array([LTE[i] == Predicted_labels[i] for i in range(len(LTE))]) # create an array of boolean with correct and uncorrect predictions
     
+    
+    accuracy = 100*(result.sum())/len(LTE) # summing an array of boolean returns the number of true values
+    error_rate = 100-accuracy
+    print(error_rate)
+     
     return 
     
     
+def LogGaussianClassifier(DTR,LTR,DTE,LTE):
+    
+    S = []
+    
 
+    for i in range(LTR.max()+1):
+        D_c = DTR[:,LTR == i] 
+        mu,C = mean_and_covariance(D_c)
+        f_conditional = lib.logpdf_GAU_ND_fast(DTE, mu, C)
+        S.append(lib.vrow(f_conditional))
+    S = np.vstack(S)
+    
+    prior = np.ones(S.shape)/3.0
+    
+    logSJoint = S + np.log(prior)
+    logSMarginal = lib.vrow(scipy.special.logsumexp(logSJoint, axis=0))
+    logSPost = logSJoint - logSMarginal
+    SPost = np.exp(logSPost)
+    
+    Predicted_labels = np.argmax(SPost,0) 
+    result = np.array([LTE[i] == Predicted_labels[i] for i in range(len(LTE))]) 
+    
+    
+    accuracy = 100*(result.sum())/len(LTE) 
+    error_rate = 100-accuracy
+    print(error_rate)
+    
+    return
+    
 
 if __name__ == '__main__':
     
     D,L = load_iris()
     (DTR, LTR),(DTE,LTE) = split_db_2to1(D,L)
-    GaussianClassifier(DTR,LTR)
+    LogGaussianClassifier(DTR,LTR,DTE,LTE)
+    
     
     

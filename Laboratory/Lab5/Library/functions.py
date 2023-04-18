@@ -27,4 +27,3 @@ def logpdf_GAU_ND_fast(X, mu, C):
     return const - 0.5 * logdet - 0.5 *v 
 
 
-
