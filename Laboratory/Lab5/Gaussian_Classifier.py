@@ -4,8 +4,8 @@ import sklearn.datasets
 import Library.functions as lib
 import Library.GaussClassifier as GAU
 
-def vcol(array):
-    return array.reshape((array.size, 1))
+
+
 
 
 # load iris dataset
@@ -29,12 +29,21 @@ def split_db_2to1(D, L, seed=0):
 
 def mean_and_covariance(data_matrix):
     N = data_matrix.shape[1]
-    mu = vcol(data_matrix.mean(1)) 
+    mu = lib.vcol(data_matrix.mean(1)) 
     DC = data_matrix - mu 
     C = np.dot(DC, DC.T)/N
     
     return mu, C
+  
+def acc_err_evaluate(Predicted_labels,Real_labels):
     
+    result = np.array([Real_labels[i] == Predicted_labels[i] for i in range(len(Real_labels))]) # create an array of boolean with correct and uncorrect predictions
+
+    acc = 100*(result.sum())/len(Real_labels) # summing an array of boolean returns the number of true values
+    err = 100-acc
+    
+    return acc,err
+      
 
 def GaussianClassifier(DTR,LTR,DTE,LTE):
     
@@ -51,18 +60,25 @@ def GaussianClassifier(DTR,LTR,DTE,LTE):
     
     prior = np.ones(S.shape)/3.0 # create a matrix n_classes*n_test_sample
     # prior = lib.vcol(np.ones(3)/3.0) works too since broadcasting is performed in the following line
+    
+    print("CHECKS: \n")
+    
     SJoint = S*prior
+    Joint = np.load("utils/SJoint_MVG.npy")
+    print((SJoint-Joint).max())
+    
     SMarginal = lib.vrow(SJoint.sum(0))
+    
     SPost = SJoint/SMarginal
+    Posterior = np.load("utils/Posterior_MVG.npy")
+    print((SPost-Posterior).max())
     
     Predicted_labels = np.argmax(SPost,0) # checks value in the column and return the index of the highest ( so the label )
-    result = np.array([LTE[i] == Predicted_labels[i] for i in range(len(LTE))]) # create an array of boolean with correct and uncorrect predictions
     
+    error_rate = acc_err_evaluate(Predicted_labels,LTE)[1]
+    print("Error rate (GaussianClassifier): ",error_rate)
+    print("\n")
     
-    accuracy = 100*(result.sum())/len(LTE) # summing an array of boolean returns the number of true values
-    error_rate = 100-accuracy
-    print(error_rate)
-     
     return 
     
     
@@ -80,18 +96,29 @@ def LogGaussianClassifier(DTR,LTR,DTE,LTE):
     
     prior = np.ones(S.shape)/3.0
     
+    print("CHECKS: \n")
+    
     logSJoint = S + np.log(prior)
+    logJoint = np.load("utils\logSJoint_MVG.npy")
+    print((logSJoint-logJoint).max())
+    
     logSMarginal = lib.vrow(scipy.special.logsumexp(logSJoint, axis=0))
+    logMarginal = np.load("utils/logMarginal_MVG.npy")
+    print((logSMarginal-logMarginal).max())
+    
     logSPost = logSJoint - logSMarginal
+    logPosterior = np.load("utils/logPosterior_MVG.npy")
+    print((logSPost - logPosterior).max())
+    
     SPost = np.exp(logSPost)
+    Posterior = np.load("utils/Posterior_MVG.npy")
+    print((SPost-Posterior).max())
+    
     
     Predicted_labels = np.argmax(SPost,0) 
-    result = np.array([LTE[i] == Predicted_labels[i] for i in range(len(LTE))]) 
-    
-    
-    accuracy = 100*(result.sum())/len(LTE) 
-    error_rate = 100-accuracy
-    print(error_rate)
+    error_rate = acc_err_evaluate(Predicted_labels,LTE)[1]
+    print("Error rate (LogGaussianClassifier): ",error_rate)
+    print("\n")
     
     return
     
@@ -112,18 +139,29 @@ def NaiveBayes_GaussianClassifier(DTR,LTR,DTE,LTE):
     
     prior = np.ones(S.shape)/3.0
     
+    print("CHECKS: \n")
+    
     logSJoint = S + np.log(prior)
+    logJoint = np.load("utils\logSJoint_NaiveBayes.npy")
+    print((logSJoint-logJoint).max())
+    
     logSMarginal = lib.vrow(scipy.special.logsumexp(logSJoint, axis=0))
+    logMarginal = np.load("utils/logMarginal_NaiveBayes.npy")
+    print((logSMarginal-logMarginal).max())
+    
     logSPost = logSJoint - logSMarginal
+    logPosterior = np.load("utils/logPosterior_NaiveBayes.npy")
+    print((logSPost - logPosterior).max())
+    
     SPost = np.exp(logSPost)
+    Posterior = np.load("utils/Posterior_NaiveBayes.npy")
+    print((SPost-Posterior).max())
+    
     
     Predicted_labels = np.argmax(SPost,0) 
-    result = np.array([LTE[i] == Predicted_labels[i] for i in range(len(LTE))]) 
-    
-    
-    accuracy = 100*(result.sum())/len(LTE) 
-    error_rate = 100-accuracy
-    print(error_rate)
+    error_rate = acc_err_evaluate(Predicted_labels,LTE)[1]
+    print("Error rate (Naive Bayes GaussianClassifier): ",error_rate)
+    print("\n")
     
     return
 
@@ -131,8 +169,10 @@ if __name__ == '__main__':
     
     D,L = load_iris()
     (DTR, LTR),(DTE,LTE) = split_db_2to1(D,L)
+    GaussianClassifier(DTR,LTR,DTE,LTE)
     LogGaussianClassifier(DTR,LTR,DTE,LTE)
     NaiveBayes_GaussianClassifier(DTR,LTR,DTE,LTE)
+
     
     
     
