@@ -41,13 +41,14 @@ def GaussianClassifier(D,L):
     for i in range(L.max()+1):
         D_c = D[:,L == i] 
         mu,C = mean_and_covariance(D_c)
-        f_conditional = lib.logpdf_GAU_ND_fast(D_c, mu, C)
+        f_conditional = lib.logpdf_GAU_ND_fast(D, mu, C)
         S.append(lib.vrow(f_conditional))
+    S = np.vstack(S)
+    print(S.shape) # check inf score matrix is n_classes*n_test_sample
     
-    np.vstack(S)
-        
-        
     
+        
+
     return 
     
     
