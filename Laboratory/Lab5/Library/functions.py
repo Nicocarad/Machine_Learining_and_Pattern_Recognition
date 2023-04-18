@@ -23,6 +23,7 @@ def logpdf_GAU_ND_fast(X, mu, C):
     logdet = np.linalg.slogdet(C)[1]
     L = np.linalg.inv(C)
     v = (X_c*np.dot(L, X_c)).sum(0)
+    
     return const - 0.5 * logdet - 0.5 *v 
 
 
