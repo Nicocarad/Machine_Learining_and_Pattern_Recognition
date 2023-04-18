@@ -95,12 +95,44 @@ def LogGaussianClassifier(DTR,LTR,DTE,LTE):
     
     return
     
+    
+def NaiveBayes_GaussianClassifier(DTR,LTR,DTE,LTE):
+    
+    S = []
+    
+
+    for i in range(LTR.max()+1):
+        D_c = DTR[:,LTR == i] 
+        mu,C = mean_and_covariance(D_c)
+        identity = np.identity(C.shape[0])
+        C = C*identity
+        f_conditional = lib.logpdf_GAU_ND_fast(DTE, mu, C)
+        S.append(lib.vrow(f_conditional))
+    S = np.vstack(S)
+    
+    prior = np.ones(S.shape)/3.0
+    
+    logSJoint = S + np.log(prior)
+    logSMarginal = lib.vrow(scipy.special.logsumexp(logSJoint, axis=0))
+    logSPost = logSJoint - logSMarginal
+    SPost = np.exp(logSPost)
+    
+    Predicted_labels = np.argmax(SPost,0) 
+    result = np.array([LTE[i] == Predicted_labels[i] for i in range(len(LTE))]) 
+    
+    
+    accuracy = 100*(result.sum())/len(LTE) 
+    error_rate = 100-accuracy
+    print(error_rate)
+    
+    return
 
 if __name__ == '__main__':
     
     D,L = load_iris()
     (DTR, LTR),(DTE,LTE) = split_db_2to1(D,L)
     LogGaussianClassifier(DTR,LTR,DTE,LTE)
+    NaiveBayes_GaussianClassifier(DTR,LTR,DTE,LTE)
     
     
     
