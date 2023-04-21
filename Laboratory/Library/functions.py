@@ -18,7 +18,7 @@ def mean_and_covariance(data_matrix):
 
 def acc_err_evaluate(Predicted_labels,Real_labels):
     
-    result = np.array([Real_labels[i] == Predicted_labels[i] for i in range(len(Real_labels))]) # create an array of boolean with correct and uncorrect predictions
+    result = np.array(Real_labels == Predicted_labels) # create an array of boolean with correct and uncorrect predictions
 
     acc = 100*(result.sum())/len(Real_labels) # summing an array of boolean returns the number of true values
     err = 100-acc
