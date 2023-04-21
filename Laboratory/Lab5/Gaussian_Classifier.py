@@ -2,7 +2,7 @@ import numpy as np
 import scipy
 import sklearn.datasets
 import Library.functions as lib
-import Library.GaussClassifier as GAU
+
 
 
 
@@ -64,13 +64,13 @@ def GaussianClassifier(DTR,LTR,DTE,LTE):
     print("CHECKS: \n")
     
     SJoint = S*prior
-    Joint = np.load("utils/SJoint_MVG.npy")
+    Joint = np.load("utils\SJoint_MVG.npy")
     print((SJoint-Joint).max())
     
     SMarginal = lib.vrow(SJoint.sum(0))
     
     SPost = SJoint/SMarginal
-    Posterior = np.load("utils/Posterior_MVG.npy")
+    Posterior = np.load("utils\Posterior_MVG.npy")
     print((SPost-Posterior).max())
     
     Predicted_labels = np.argmax(SPost,0) # checks value in the column and return the index of the highest ( so the label )
@@ -103,15 +103,15 @@ def LogGaussianClassifier(DTR,LTR,DTE,LTE):
     print((logSJoint-logJoint).max())
     
     logSMarginal = lib.vrow(scipy.special.logsumexp(logSJoint, axis=0))
-    logMarginal = np.load("utils/logMarginal_MVG.npy")
+    logMarginal = np.load("utils\logMarginal_MVG.npy")
     print((logSMarginal-logMarginal).max())
     
     logSPost = logSJoint - logSMarginal
-    logPosterior = np.load("utils/logPosterior_MVG.npy")
+    logPosterior = np.load("utils\logPosterior_MVG.npy")
     print((logSPost - logPosterior).max())
     
     SPost = np.exp(logSPost)
-    Posterior = np.load("utils/Posterior_MVG.npy")
+    Posterior = np.load("utils\Posterior_MVG.npy")
     print((SPost-Posterior).max())
     
     
@@ -146,21 +146,132 @@ def NaiveBayes_GaussianClassifier(DTR,LTR,DTE,LTE):
     print((logSJoint-logJoint).max())
     
     logSMarginal = lib.vrow(scipy.special.logsumexp(logSJoint, axis=0))
-    logMarginal = np.load("utils/logMarginal_NaiveBayes.npy")
+    logMarginal = np.load("utils\logMarginal_NaiveBayes.npy")
     print((logSMarginal-logMarginal).max())
     
     logSPost = logSJoint - logSMarginal
-    logPosterior = np.load("utils/logPosterior_NaiveBayes.npy")
+    logPosterior = np.load("utils\logPosterior_NaiveBayes.npy")
     print((logSPost - logPosterior).max())
     
     SPost = np.exp(logSPost)
-    Posterior = np.load("utils/Posterior_NaiveBayes.npy")
+    Posterior = np.load("utils\Posterior_NaiveBayes.npy")
     print((SPost-Posterior).max())
     
     
     Predicted_labels = np.argmax(SPost,0) 
     error_rate = acc_err_evaluate(Predicted_labels,LTE)[1]
     print("Error rate (Naive Bayes GaussianClassifier): ",error_rate)
+    print("\n")
+    
+    return
+
+
+
+def TiedGaussianClassifier(DTR,LTR,DTE,LTE):
+    
+    # Calculate the Tied Covariance Matrix
+    C_star = 0 
+    N = DTR.shape[1]
+    for i in range(LTR.max()+1): 
+        D_c = DTR[:, LTR == i] 
+        nc = D_c.shape[1] 
+        C_star = C_star + nc*mean_and_covariance(D_c)[1] 
+    
+    C_star = C_star / N
+      
+    
+    # Apply Gaussian Classifier
+    S = []
+    
+    for i in range(LTR.max()+1):
+        D_c = DTR[:,LTR == i] 
+        mu = mean_and_covariance(D_c)[0]
+        f_conditional = lib.logpdf_GAU_ND_fast(DTE, mu, C_star)
+        S.append(lib.vrow(f_conditional))
+    S = np.vstack(S)
+        
+    
+    prior = np.ones(S.shape)/3.0
+    
+    print("CHECKS: \n")
+    
+    logSJoint = S + np.log(prior)
+    logJoint = np.load("utils\logSJoint_TiedMVG.npy")
+    print((logSJoint-logJoint).max())
+    
+    logSMarginal = lib.vrow(scipy.special.logsumexp(logSJoint, axis=0))
+    logMarginal = np.load("utils\logMarginal_TiedMVG.npy")
+    print((logSMarginal-logMarginal).max())
+    
+    logSPost = logSJoint - logSMarginal
+    logPosterior = np.load("utils\logPosterior_TiedMVG.npy")
+    print((logSPost - logPosterior).max())
+    
+    SPost = np.exp(logSPost)
+    Posterior = np.load("utils\Posterior_TiedMVG.npy")
+    print((SPost-Posterior).max())
+    
+    
+    Predicted_labels = np.argmax(SPost,0) 
+    error_rate = acc_err_evaluate(Predicted_labels,LTE)[1]
+    print("Error rate (Tied Covariance GaussianClassifier): ",error_rate)
+    print("\n")
+    
+    return
+    
+
+def Tied_NaiveBayes_GaussianClassifier(DTR,LTR,DTE,LTE):
+    
+    # Calculate the Tied Covariance Matrix
+    C_star = 0 
+    N = DTR.shape[1]
+    for i in range(LTR.max()+1): 
+        D_c = DTR[:, LTR == i] 
+        nc = D_c.shape[1] 
+        C_star = C_star + nc*mean_and_covariance(D_c)[1] 
+    
+    C_star = C_star / N
+    
+    
+    # Diagonalize the covariance matrix
+    identity = np.identity(C_star.shape[0])
+    C_star = C_star*identity
+    
+    
+    # Apply Gaussian Classifier
+    S = []
+    
+    for i in range(LTR.max()+1):
+        D_c = DTR[:,LTR == i] 
+        mu = mean_and_covariance(D_c)[0]
+        f_conditional = lib.logpdf_GAU_ND_fast(DTE, mu, C_star)
+        S.append(lib.vrow(f_conditional))
+    S = np.vstack(S)  
+    
+    prior = np.ones(S.shape)/3.0
+    
+    print("CHECKS: \n")
+    
+    logSJoint = S + np.log(prior)
+    logJoint = np.load("utils\logSJoint_TiedNaiveBayes.npy")
+    print((logSJoint-logJoint).max())
+    
+    logSMarginal = lib.vrow(scipy.special.logsumexp(logSJoint, axis=0))
+    logMarginal = np.load("utils\logMarginal_TiedNaiveBayes.npy")
+    print((logSMarginal-logMarginal).max())
+    
+    logSPost = logSJoint - logSMarginal
+    logPosterior = np.load("utils\logPosterior_TiedNaiveBayes.npy")
+    print((logSPost - logPosterior).max())
+    
+    SPost = np.exp(logSPost)
+    Posterior = np.load("utils\Posterior_TiedNaiveBayes.npy")
+    print((SPost-Posterior).max())
+    
+    
+    Predicted_labels = np.argmax(SPost,0) 
+    error_rate = acc_err_evaluate(Predicted_labels,LTE)[1]
+    print("Error rate (Tied Naive Bayes  GaussianClassifier): ",error_rate)
     print("\n")
     
     return
@@ -172,6 +283,8 @@ if __name__ == '__main__':
     GaussianClassifier(DTR,LTR,DTE,LTE)
     LogGaussianClassifier(DTR,LTR,DTE,LTE)
     NaiveBayes_GaussianClassifier(DTR,LTR,DTE,LTE)
+    TiedGaussianClassifier(DTR,LTR,DTE,LTE)
+    Tied_NaiveBayes_GaussianClassifier(DTR,LTR,DTE,LTE)
 
     
     
