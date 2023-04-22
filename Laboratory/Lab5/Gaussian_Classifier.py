@@ -56,7 +56,7 @@ def GaussianClassifier(DTR,LTR,DTE,LTE):
         S.append(lib.vrow(f_conditional))
     S = np.vstack(S)
     
-    #print(S.shape) # check inf score matrix is n_classes*n_test_sample
+    #print(S.shape) # checks if score matrix is n_classes*n_test_sample
     
     prior = np.ones(S.shape)/3.0 # create a matrix n_classes*n_test_sample
     # prior = lib.vcol(np.ones(3)/3.0) works too since broadcasting is performed in the following line
@@ -279,6 +279,10 @@ def Tied_NaiveBayes_GaussianClassifier(DTR,LTR,DTE,LTE):
 if __name__ == '__main__':
     
     D,L = load_iris()
+    #DTR: Training data
+    #LTR: Training labels
+    #DTE: Evaluation data
+    #LTE: Evaluation labels
     (DTR, LTR),(DTE,LTE) = split_db_2to1(D,L)
     GaussianClassifier(DTR,LTR,DTE,LTE)
     LogGaussianClassifier(DTR,LTR,DTE,LTE)
