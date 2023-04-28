@@ -161,21 +161,18 @@ def Tied_NaiveBayes_GaussianClassifier(DTR,LTR,DTE,LTE):
     return  SPost
 
 
-def kfold(model,k,D,L):
+def kfold(model,k,D,L,seed=0):
     
 
     SPost_partial = []
     folds = []
-    
-    
+     
      # Create a list with indices of the Label vector in a random order
-    np.random.seed(0)
+    np.random.seed(seed)
     idx = np.random.permutation(D.shape[1])
     
     Label = L[idx] # randomize the vector of Real_labels in the same way
-    
-    #idx = np.arange(150)
-    print(idx)
+
     
     fold_size = D.shape[1] // k
 
@@ -219,12 +216,12 @@ if __name__ == '__main__':
     #LTR: Training labels
     #DTE: Evaluation data
     #LTE: Evaluation labels
-    print("GaussianClassifier Error Rate:", round(100-kfold(GaussianClassifier,3,D,L),1), "% \n")
-    print("LogGaussianClassifier Error Rate:", round(100-kfold(LogGaussianClassifier,3,D,L),1), "% \n")
-    print("NaiveBayes_GaussianClassifier Error Rate:", round(100-kfold(NaiveBayes_GaussianClassifier,3,D,L),1), "% \n")
-    print("TiedGaussianClassifier Error Rate:", 100-kfold(TiedGaussianClassifier,3,D,L), "% \n")
-    print("Tied_NaiveBayes_GaussianClassifier Error Rate:", 100-kfold(Tied_NaiveBayes_GaussianClassifier,3,D,L), "% \n")
-    #J = np.load("utils/LOO_logSJoint_TiedNaiveBayes.npy")
+    print("GaussianClassifier Error Rate:", round(100-kfold(GaussianClassifier,150,D,L),1), "% \n")
+    print("LogGaussianClassifier Error Rate:", round(100-kfold(LogGaussianClassifier,150,D,L),1), "% \n")
+    print("NaiveBayes_GaussianClassifier Error Rate:", round(100-kfold(NaiveBayes_GaussianClassifier,150,D,L),1), "% \n")
+    print("TiedGaussianClassifier Error Rate:", 100-kfold(TiedGaussianClassifier,150,D,L), "% \n")
+    print("Tied_NaiveBayes_GaussianClassifier Error Rate:", 100-kfold(Tied_NaiveBayes_GaussianClassifier,150,D,L), "% \n")
+
     
     
     
