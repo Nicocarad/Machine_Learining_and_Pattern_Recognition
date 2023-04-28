@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -85,7 +86,6 @@ def MVG_classifier(DTR, LTR, DTE, LTE):
    Predicted = Predictions.sum()
    NotPredicted = Predictions.size - Predicted
    acc = Predicted/Predictions.size
-   
 
    return Predicted, DTE.shape[1]
 
@@ -219,13 +219,13 @@ TiedCovarianceGaussianClassifier(DTR, LTR, DTE, LTE)
 # In[11]:
 
 
-K = 150
+K = 3
 N = int(D.shape[1]/K)
 classifiers = [(MVG_log, "Multivariate Gaussian Classifier"), (NaiveBayesGaussianClassifier, "Naive Bayes"), (TiedCovarianceGaussianClassifier, "Tied Covariance")]
 
 for j, (c, cstring) in enumerate(classifiers):
     nWrongPrediction = 0
-    numpy.random.seed(j)
+    numpy.random.seed(0)
     indexes = numpy.random.permutation(D.shape[1])
     for i in range(K):
 
@@ -256,6 +256,10 @@ for j, (c, cstring) in enumerate(classifiers):
 
 
 # In[ ]:
+
+
+
+
 
 
 
