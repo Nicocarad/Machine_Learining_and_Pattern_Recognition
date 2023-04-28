@@ -79,6 +79,7 @@ def GaussianClassifier(DTR,LTR,DTE,LTE):
     print("Error rate (GaussianClassifier): ",error_rate)
     print("\n")
     
+    
     return 
     
     
@@ -276,6 +277,8 @@ def Tied_NaiveBayes_GaussianClassifier(DTR,LTR,DTE,LTE):
     
     return
 
+
+
 if __name__ == '__main__':
     
     D,L = load_iris()
@@ -290,6 +293,7 @@ if __name__ == '__main__':
     TiedGaussianClassifier(DTR,LTR,DTE,LTE)
     Tied_NaiveBayes_GaussianClassifier(DTR,LTR,DTE,LTE)
 
-    
-    
+         
+
+        
     

@@ -85,6 +85,7 @@ def MVG_classifier(DTR, LTR, DTE, LTE):
    Predicted = Predictions.sum()
    NotPredicted = Predictions.size - Predicted
    acc = Predicted/Predictions.size
+   
 
    return Predicted, DTE.shape[1]
 
