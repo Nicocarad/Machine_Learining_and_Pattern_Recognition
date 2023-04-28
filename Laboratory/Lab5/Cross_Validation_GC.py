@@ -10,20 +10,27 @@ def load_iris():
     D, L = sklearn.datasets.load_iris()['data'].T, sklearn.datasets.load_iris()['target']
     return D, L
 
-# divide the dataset in a Training set and Validation Set
-def split_db_2to1(D, L, seed=0):
-    nTrain = int(D.shape[1]*2.0/3.0) # nTrain = 100
+# shuffle the dataset 
+def shuffle_dataset(D, L, seed=0):
+    n_samples = int(D.shape[1]) # nTrain = 150
     np.random.seed(seed) # procduce always the same sequence of random values
     idx = np.random.permutation(D.shape[1]) #compute a permutetion of index: [0,1,2,...,149] to [114,32,11,...,35] randomly
-    idxTrain = idx[0:nTrain] # assign the first 2/3 of the indexes to the training set
-    idxTest = idx[nTrain:] # assign the last 1/3 of the indexes to the test set
-    DTR = D[:, idxTrain]
-    DTE = D[:, idxTest]
-    LTR = L[idxTrain]
-    LTE = L[idxTest]
-    return (DTR, LTR), (DTE, LTE)
+    idx = idx[0:n_samples] 
+    Data = D[:, idx]
+    Labels = L[idx]
 
+    return Data, Labels
 
+def K_fold_Corss_Validation(model,K, D, L):
+    
+    D_split = np.split(D,K,1) #split the samples matrix D in K partitions considering axis=1
+    L_split = np.split(L,K,1) #split the labels L in K partitions
+    
+    
+    
+    
+    
+    return
 def mean_and_covariance(data_matrix):
     N = data_matrix.shape[1]
     mu = lib.vcol(data_matrix.mean(1)) 
@@ -120,9 +127,12 @@ def NaiveBayes_GaussianClassifier(DTR,LTR,DTE,LTE):
 if __name__ == '__main__':
     
     D,L = load_iris()
+    
     #DTR: Training data
     #LTR: Training labels
     #DTE: Evaluation data
     #LTE: Evaluation labels
-    (DTR, LTR),(DTE,LTE) = split_db_2to1(D,L)
+    D,L = shuffle_dataset(D,L)
+    Split = np.split(D,5,1)
+    print(Split[0].shape)
     
