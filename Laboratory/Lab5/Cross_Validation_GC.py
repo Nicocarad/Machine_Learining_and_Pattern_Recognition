@@ -183,7 +183,7 @@ def kfold(model,k,D,L,seed=0):
         folds.append(idx[start:end])
     
 
-    # If the nuber of samples is not divisible by K, add the leavings samples in the last fold
+    # If the number of samples is not divisible by K, add the leavings samples in the last fold
     if D.shape[1] % k != 0:
         folds[-1] = np.concatenate((folds[-1], idx[k * fold_size:]))
         
