@@ -22,6 +22,12 @@ def split_db_2to1(D, L, seed=0):
     LTE = L[idxTest]
     return (DTR, LTR), (DTE, LTE)
 
+def logreg_obj(v,DTR,LTR,l):
+    
+    return
+    
+    
+    
 if __name__ == '__main__':
     
     D, L = load_iris_binary()
