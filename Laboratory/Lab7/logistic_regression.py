@@ -22,9 +22,26 @@ def split_db_2to1(D, L, seed=0):
     LTE = L[idxTest]
     return (DTR, LTR), (DTE, LTE)
 
-def logreg_obj(v,DTR,LTR,l):
+
+
+class logRegClass:
     
-    return
+    def __init__(self, DTR, LTR, l):
+        self.DTR = DTR
+        self.LTR = LTR
+        self.l = l
+        
+    def logreg_obj(self, v):
+        
+        w = 0
+        b = 0
+        z = 0
+        x = 0
+        n = DTR.shape[0]
+        term1 = -self.l*0.5*np.linalg.norm(w)
+        expo = -z * (w.T.dot(self.DTR) + b)
+        term2 = np.logaddexp(0,expo)
+        
     
     
     
