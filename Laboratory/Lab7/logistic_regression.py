@@ -1,4 +1,5 @@
 import numpy as np
+import scipy.optimize as opt
 
 
 
@@ -24,7 +25,14 @@ def split_db_2to1(D, L, seed=0):
     LTE = L[idxTest]
     return (DTR, LTR), (DTE, LTE)
 
+def acc_err_evaluate(Predicted_labels,Real_labels):
+    
+    result = np.array(Real_labels == Predicted_labels) # create an array of boolean with correct and uncorrect predictions
 
+    acc = 100*(result.sum())/len(Real_labels) # summing an array of boolean returns the number of true values
+    err = 100-acc
+    
+    return acc,err
 
 class logRegClass():
     
@@ -35,20 +43,27 @@ class logRegClass():
         
     def logreg_obj(self, v):
         
+        
+        # v is an array [DTR.shape[0]+1] 
+        # the initial value of v is the starting point "x0" passed by the user to the function "fmin_l_bfgs_b"
+        # at each iteration following the first one, v is passed directly by of "fmin_l_bfgs_b"
+        # v corresponds to the "evaluated" minimum at each iteration of the gradient descending algorithm
+        
         w, b = v[0:-1], v[-1] 
+
         z = 2*self.LTR -1 #remap the label from {0,1} to {-1,1}
         x = self.DTR
-        n = self.DTR.shape[1]
         
-        normalization = -self.l*0.5*np.linalg.norm(w)
+        normalizer = self.l * 0.5 * np.linalg.norm(w)**2 #calculate the normalization term
         
-        expo = -z * (w.T.dot(x) + b)
+        expo = -z * (w.T.dot(x) + b) # expo is a vector containing the result of e^(-z_i(w.T * x_i + b)) for each sample
+          
+        loss_funct = np.logaddexp(0,expo).mean() #np.logaddexp(0,expo) is a vector containing the result of log(1+expo[i]) for each samples
+        # .mean() sums all the logarithms and than divides by the number of elements
         
-        loss_funct = np.logaddexp(0,expo)/n
+
+        return normalizer + loss_funct
         
-        J = normalization + loss_funct
-        
-        return J
         
     
     
@@ -58,7 +73,34 @@ if __name__ == '__main__':
     D, L = load_iris_binary()
     (DTR, LTR), (DTE, LTE) = split_db_2to1(D, L)
     
-
+    # x0 is the initial point for the gradient descending algorithm
+    # x0 has 4 components because the function is four-dimensional
+    # the function is four-dimensional because attributes have 4 attributes
+    x0 = np.zeros(DTR.shape[0] + 1)
+    
+    lambdaVector = np.array([1.E-6, 1.E-3, 1.E-1, 1])
+    
+    for l in lambdaVector:
+        
+        logRegObj = logRegClass(DTR,LTR,l)
+        
+        x,f,_ = opt.fmin_l_bfgs_b(logRegObj.logreg_obj,x0,approx_grad = True,factr=10000000.0, maxfun=20000)
+        
+        # retreive from the estimated point of the minimum the four informations: 3 info for parameter "w" and one for parameter "b"
+        w_opt,b_opt = x[0:-1], x[-1]
+    
+        # evaluate the score array using w_opt and b_opt obtained by the training set and apply them on the evaluation/test set
+        S = np.dot(w_opt.T,DTE) + b_opt
+    
+        Predicted_Labels = (S > 0).astype(int)
+    
+        acc,err = acc_err_evaluate(Predicted_Labels,LTE)
+        
+        print("Lambda:",l)
+        print("J(w*,b*)",round(f,6))
+        print("Error rate:",round(err,1), "%")
+        print("-------------------\n")
+    
 
 
     

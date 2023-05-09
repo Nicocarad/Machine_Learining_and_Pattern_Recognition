@@ -69,13 +69,13 @@ if __name__ == "__main__":
     logReg = logRegClass(DTR, LTR, 1.E-3)
 
     lambdaVector = np.array([0, 1.E-6, 1.E-3, 1])
-
+    
     for l in lambdaVector:
 
         logReg.setLambda(l)
 
         x, f, d = spo.fmin_l_bfgs_b(func=logReg.logRegObj, x0=np.zeros(DTR.shape[0] + 1), approx_grad=True, factr=5000, maxfun=20000)
-
+        
         S = (np.dot(x[0:-1].T, DTE) + x[-1])
 
         LP = (S > 0).astype(int) 
