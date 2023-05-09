@@ -67,7 +67,6 @@ class logRegClass():
         
     
     
-    
 if __name__ == '__main__':
     
     D, L = load_iris_binary()
@@ -80,6 +79,8 @@ if __name__ == '__main__':
     
     lambdaVector = np.array([1.E-6, 1.E-3, 1.E-1, 1])
     
+    print('{:<10s}  {:<10s}  {:<10s}'.format('Lambda', 'J(w*,b*)', 'Error rate %'))
+    print()
     for l in lambdaVector:
         
         logRegObj = logRegClass(DTR,LTR,l)
@@ -95,11 +96,12 @@ if __name__ == '__main__':
         Predicted_Labels = (S > 0).astype(int)
     
         acc,err = acc_err_evaluate(Predicted_Labels,LTE)
-        
-        print("Lambda:",l)
-        print("J(w*,b*)",round(f,6))
-        print("Error rate:",round(err,1), "%")
-        print("-------------------\n")
+
+        print('{:<10}  {:<10.6f}  {:<10.2f}'.format(l, round(f,6), round(err,1)))
+       
+
+    
+
     
 
 
