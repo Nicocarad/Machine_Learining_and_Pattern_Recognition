@@ -95,9 +95,9 @@ if __name__ == '__main__':
     
         Predicted_Labels = (S > 0).astype(int)
     
-        acc,err = acc_err_evaluate(Predicted_Labels,LTE)
+        err = acc_err_evaluate(Predicted_Labels,LTE)[1]
 
-        print('{:<10}  {:<10.6f}  {:<10.2f}'.format(l, round(f,6), round(err,1)))
+        print('{:<10}  {:<10.6f}  {:<10.1f}'.format(l, f, err))
        
 
     
