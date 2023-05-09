@@ -1,8 +1,10 @@
 import numpy as np
-import sklearn
+
 
 
 def load_iris_binary():
+    
+    import sklearn.datasets
     
     D, L = sklearn.datasets.load_iris()['data'].T, sklearn.datasets.load_iris()['target']
     D = D[:, L != 0] # We remove setosa from D
@@ -24,7 +26,7 @@ def split_db_2to1(D, L, seed=0):
 
 
 
-class logRegClass:
+class logRegClass():
     
     def __init__(self, DTR, LTR, l):
         self.DTR = DTR
@@ -33,14 +35,20 @@ class logRegClass:
         
     def logreg_obj(self, v):
         
-        w = 0
-        b = 0
-        z = 0
-        x = 0
-        n = DTR.shape[0]
-        term1 = -self.l*0.5*np.linalg.norm(w)
-        expo = -z * (w.T.dot(self.DTR) + b)
-        term2 = np.logaddexp(0,expo)
+        w, b = v[0:-1], v[-1] 
+        z = 2*self.LTR -1 #remap the label from {0,1} to {-1,1}
+        x = self.DTR
+        n = self.DTR.shape[1]
+        
+        normalization = -self.l*0.5*np.linalg.norm(w)
+        
+        expo = -z * (w.T.dot(x) + b)
+        
+        loss_funct = np.logaddexp(0,expo)/n
+        
+        J = normalization + loss_funct
+        
+        return J
         
     
     
@@ -49,6 +57,7 @@ if __name__ == '__main__':
     
     D, L = load_iris_binary()
     (DTR, LTR), (DTE, LTE) = split_db_2to1(D, L)
+    
 
 
 
