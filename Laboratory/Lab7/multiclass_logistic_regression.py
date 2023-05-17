@@ -44,17 +44,7 @@ def acc_err_evaluate(Predicted_labels,Real_labels):
         err = 100-acc
     
         return acc,err
-    
-def tMatrix(L):
-    T = np.zeros((L.max()+1, L.shape[0]))
-    for i, k in enumerate(L):
-        T[k, i] = 1
-
-    return T   
-
-def yLogMatrix(scoreMatrix):
-    logsum = scipy.special.logsumexp(scoreMatrix,axis=0)
-    return scoreMatrix - logsum
+      
     
 class logRegClass():
     
@@ -66,23 +56,30 @@ class logRegClass():
     def logreg_obj(self, v):
         
     
-       K = LTE.max()+1
-       T = tMatrix(LTR)
+       K = LTR.max()+1
        D = DTR.shape[0]
-       W = np.zeros((D,K))
-       b = np.zeros((K,1))
        x = self.DTR
+       n_samples = DTR.shape[1]
+       
+       # 1 of K encoding
+       T = np.zeros((LTR.max()+1, LTR.shape[0]))
+       for i, k in enumerate(LTR):
+            T[k, i] = 1
        
        
-       b = vcol(v[-K:])
+       # W_size = D x K
+       # b_size = K x 1
        W = reshapeMat((v[0:-K]),DTR.shape[0])
+       b = vcol(v[-K:])
        
        S = np.dot(W.T, x) + b  #matrix of scores 
-       logY = yLogMatrix(S)
+       logsum = scipy.special.logsumexp(S,axis=0)
+       logY = S -logsum
        normalizer = self.l * 0.5 * (W*W).sum() #calculate the normalization term
        
        
-       loss_funct = 1/LTR.shape[0]*(T*logY).sum()
+       loss_funct = 1/n_samples*(T*logY).sum()
+       
        
        J = normalizer - loss_funct
        
@@ -100,7 +97,7 @@ if __name__ == '__main__':
 
     W_opt = np.zeros((DTR.shape[0],K))
     
-    x0 = np.zeros(DTR.shape[0]*K + K)
+    x0 = np.zeros(DTR.shape[0]*K + K) # w1(dim1,dim2,dim3,dim4) b1 = dim1 so for K classes x0 is 4*3 + 3
 
     
     lambdaVector = np.array([1.E-6, 1.E-3, 1.E-1, 1])
@@ -113,9 +110,8 @@ if __name__ == '__main__':
         
         x,f,_ = opt.fmin_l_bfgs_b(logRegObj.logreg_obj,x0,approx_grad = True)
         
-        b_opt = vcol(x[-K:])
-
         W_opt = reshapeMat(x[0:-K],DTR.shape[0])
+        b_opt = vcol(x[-K:])
         # evaluate the score array using w_opt and b_opt obtained by the training set and apply them on the evaluation/test set
         S = np.dot(W_opt.T,DTE) + b_opt
         
