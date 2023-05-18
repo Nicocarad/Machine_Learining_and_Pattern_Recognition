@@ -74,7 +74,7 @@ class logRegClass():
        
        S = np.dot(W.T, x) + b  #matrix of scores 
        logsum = scipy.special.logsumexp(S,axis=0)
-       logY = S -logsum
+       logY = S - logsum
        normalizer = self.l * 0.5 * (W*W).sum() #calculate the normalization term
        
        
