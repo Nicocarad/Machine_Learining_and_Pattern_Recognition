@@ -58,8 +58,9 @@ def min_DCF(pi, C_fn, C_fp,LTE,scores):
 if __name__ == '__main__':
     
     
-    llr = np.load("Data/commedia_llr_infpar.npy")
+    llr = np.load("Data/commedia_llr_infpar.npy.npy")
     LTE = np.load("Data/commedia_labels_infpar.npy")
+    
     
     effPriorLogOdds = np.linspace(-3, 3, 21)
     
