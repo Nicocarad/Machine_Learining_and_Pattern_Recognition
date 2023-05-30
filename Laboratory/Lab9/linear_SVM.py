@@ -2,8 +2,6 @@ import numpy
 import scipy 
 
 
-def mRow(v):
-    return v.reshape((1,v.size)) #sizes gives the number of elements in the matrix/array
 def mCol(v):
     return v.reshape((v.size, 1))
 
@@ -69,8 +67,6 @@ def linear_SVM(K,C,DTR,LTR):
     #Creating D_hat= [xi, k] with k=1
     ones_array = numpy.ones((K, DTR.shape[1]))
     D_hat = numpy.concatenate((DTR, ones_array), axis=0)
-    print(D_hat.shape)
-
     
     #Compute H_hat
     G_hat = numpy.dot(D_hat.T,D_hat)
@@ -93,14 +89,12 @@ def linear_SVM(K,C,DTR,LTR):
     w_hat_star = numpy.sum( mCol(x) * mCol(Z) * D_hat.T,  axis=0 )
 
     
-    # # Extract terms and compute scores
+    # Extract terms and compute scores
+    w_star = w_hat_star[0:-1] 
+    b_star = w_hat_star[-1] 
     
-    # w_star = w_hat_star[0:-K] 
-    # b_star = w_hat_star[-K] 
+    scores = numpy.dot(mCol(w_star).T, DTE) + b_star
     
-    # scores = numpy.dot(mCol(w_star).T, DTE) + b_star
-    
-    scores = numpy.dot(w_hat_star.T,D_hat)
     
     primal_obj,duality_gap = compute_duality_gap(w_hat_star, C, Z, D_hat,f)
     dual_obj = f
@@ -118,8 +112,8 @@ if __name__ == '__main__':
     D, L = load_iris_binary()
     (DTR, LTR), (DTE, LTE) = split_db_2to1(D, L)
     
-    K_values = [1, 1, 1, 10, 10, 10]
-    C_values = [0.1, 1.0, 10.0, 0.1, 1.0, 10.0]
+    K_values = [1, 1, 1]
+    C_values = [0.1, 1.0, 10.0]
     
     for i in range(len(K_values)):
         K = K_values[i]
