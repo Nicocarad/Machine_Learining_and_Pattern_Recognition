@@ -38,6 +38,17 @@ def split_db_2tol(D,L, seed=0):
 
     return [(DTR, LTR), (DTE,LTE)]
 
+
+def compute_accuracy_error(predicted_labels, LTE):
+    good_predictions = (predicted_labels == LTE) #array with True when predicted_labels[i] == LTE[i]    
+    num_corrected_predictions =(good_predictions==True).sum()
+    tot_predictions = predicted_labels.size
+    accuracy= num_corrected_predictions /tot_predictions
+    error = (tot_predictions - num_corrected_predictions ) /tot_predictions
+
+    return (accuracy, error)
+    
+
 def compute_lagrangian_wrapper(H):
 
     def compute_lagrangian(alpha):
@@ -52,16 +63,6 @@ def compute_lagrangian_wrapper(H):
     return compute_lagrangian
 
 
-def compute_accuracy_error(predicted_labels, LTE):
-    good_predictions = (predicted_labels == LTE) #array with True when predicted_labels[i] == LTE[i]    
-    num_corrected_predictions =(good_predictions==True).sum()
-    tot_predictions = predicted_labels.size
-    accuracy= num_corrected_predictions /tot_predictions
-    error = (tot_predictions - num_corrected_predictions ) /tot_predictions
-
-    return (accuracy, error)
-    
-
 def compute_primal_objective(w_hat_star, C, Z, D_hat):
 
     w_hat_star = mCol(w_hat_star)
@@ -74,6 +75,7 @@ def compute_primal_objective(w_hat_star, C, Z, D_hat):
     fun4= numpy.sum(sommatoria)
     fun5= C*fun4
     ris = fun1 +fun5
+    
     return ris
     
 
@@ -91,8 +93,9 @@ if __name__ == '__main__':
     # DTE: Evaluation Data
     # LTR: Training Labels
     # LTE: Evaluation Labels
-    K=1
+    K=10
     k_values= numpy.ones([1,DTR.shape[1]]) *K
+    
     #Creating D_hat= [xi, k] with k=1
     D_hat = numpy.vstack((DTR, k_values))
     #Creating H_hat
@@ -108,6 +111,7 @@ if __name__ == '__main__':
     # 3) multiply G_hat for ZiZj operating broadcasting
     H_hat= Z * Z.T * G_hat
 
+    print(H_hat.shape)
     # Calculate L_hat_D and its gradient DUAL SOLUTION
     compute_lagr= compute_lagrangian_wrapper(H_hat)
 
@@ -117,7 +121,7 @@ if __name__ == '__main__':
     
     bounds_list = [(0,C)] * LTR.size
     (x,f,d)= scipy.optimize.fmin_l_bfgs_b(compute_lagr, approx_grad=False, x0=x0, iprint=0, bounds=bounds_list, factr=1.0)
-    
+
     # From the dual solution obtain the primal one
   
     # EVALUATION!
@@ -127,6 +131,7 @@ if __name__ == '__main__':
     w_star = w_hat_star[0:-1] 
     b_star = w_hat_star[-1] 
     
+  
     scores = numpy.dot(mCol(w_star).T, DTE) + b_star
     #Assign a pattern comparing with threshold 0
     predicted_labels = 1*(scores > 0 )
@@ -138,7 +143,7 @@ if __name__ == '__main__':
     # Compute the duality gap
     dual_obj = f #he one found with scipy.optimize
     
-    duality_gap= primal_obj + dual_obj
+    duality_gap = primal_obj + dual_obj
     print(">>>> LINEAR SVM <<<<")
     print("K:", K)
     print("C:", C)
