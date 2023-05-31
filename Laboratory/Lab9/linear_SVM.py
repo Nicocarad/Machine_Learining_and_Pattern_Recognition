@@ -112,8 +112,8 @@ if __name__ == '__main__':
     D, L = load_iris_binary()
     (DTR, LTR), (DTE, LTE) = split_db_2to1(D, L)
     
-    K_values = [1, 1, 1]
-    C_values = [0.1, 1.0, 10.0]
+    K_values = [1, 1, 1, 10]
+    C_values = [0.1, 1.0, 10.0, 0.1]
     
     for i in range(len(K_values)):
         K = K_values[i]
