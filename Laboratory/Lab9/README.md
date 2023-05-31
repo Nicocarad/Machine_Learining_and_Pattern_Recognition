@@ -1,1 +1,0 @@
-The implemented code is actually working only for K = 1.
