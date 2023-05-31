@@ -5,6 +5,10 @@ import scipy
 def mCol(v):
     return v.reshape((v.size, 1))
 
+
+def mRow(array):
+    return array.reshape((1,array.size))
+
 def load_iris_binary():
     import sklearn.datasets
     D, L = sklearn.datasets.load_iris()['data'].T, sklearn.datasets.load_iris()['target']
@@ -39,10 +43,12 @@ def acc_err_evaluate(Predicted_labels,Real_labels):
 def compute_lagrangian_wrapper(H_hat):
 
     def compute_lagrangian(alpha):
-
-        ones = numpy.ones(alpha.size) # 66,
-        J_hat_D = 0.5*( numpy.linalg.multi_dot([alpha.T, H_hat, alpha]) ) - numpy.dot(alpha.T , mCol(ones))# 1x1
-        L_hat_D_gradient= numpy.dot(H_hat, alpha) - ones # 66x1
+        
+        ones =  numpy.ones(alpha.size) # 66,
+        term1 = numpy.dot(H_hat,alpha)
+        term2 = numpy.dot(alpha.T,term1)
+        J_hat_D = 0.5*term2 - numpy.dot(alpha.T , mCol(ones))# 1x1
+        L_hat_D_gradient = numpy.dot(H_hat, alpha) - ones # 66x1
         
         return J_hat_D, L_hat_D_gradient.flatten() # 66, 
    
@@ -64,16 +70,15 @@ def compute_duality_gap(w_hat_star, C, Z, D_hat, dual_obj):
 
 def linear_SVM(K,C,DTR,LTR):
     
-    #Creating D_hat= [xi, k] with k=1
-    ones_array = numpy.ones((K, DTR.shape[1]))
-    D_hat = numpy.concatenate((DTR, ones_array), axis=0)
-    
+    #Creating D_hat= [xi, k] 
+    D_hat = numpy.vstack([DTR, K * numpy.ones((1, DTR.shape[1]))])
+        
     #Compute H_hat
     G_hat = numpy.dot(D_hat.T,D_hat)
+    Z = numpy.zeros(LTR.shape)
     Z = 2*LTR -1
     Z = mCol(Z)
-    H_hat= Z * Z.T * G_hat # For each row i and column j of H_hat, take the dot product of the ith row of Z with the jth column of Z.T. This gives a scalar value.
-
+    H_hat = mCol(Z) * mRow(Z) * G_hat # For each row i and column j of H_hat, take the dot product of the ith row of Z with the jth column of Z.T. This gives a scalar value.
     #Compute Lagrangian
     compute_lagr= compute_lagrangian_wrapper(H_hat)
     
@@ -84,17 +89,14 @@ def linear_SVM(K,C,DTR,LTR):
     bounds_list = [(0,C)] * LTR.size
     (x,f,d)= scipy.optimize.fmin_l_bfgs_b(compute_lagr, approx_grad=False, x0=x0, bounds=bounds_list, factr=1.0)
     
-
     # From Dual solution to Primal solution
     w_hat_star = numpy.sum( mCol(x) * mCol(Z) * D_hat.T,  axis=0 )
-
     
     # Extract terms and compute scores
     w_star = w_hat_star[0:-1] 
-    b_star = w_hat_star[-1] 
-    
-    scores = numpy.dot(mCol(w_star).T, DTE) + b_star
-    
+    b_star = w_hat_star[-1] * K
+
+    scores = numpy.dot(w_star.T, DTE) + b_star
     
     primal_obj,duality_gap = compute_duality_gap(w_hat_star, C, Z, D_hat,f)
     dual_obj = f
@@ -112,8 +114,8 @@ if __name__ == '__main__':
     D, L = load_iris_binary()
     (DTR, LTR), (DTE, LTE) = split_db_2to1(D, L)
     
-    K_values = [1, 1, 1, 10]
-    C_values = [0.1, 1.0, 10.0, 0.1]
+    K_values = [1, 1, 1, 10, 10, 10]
+    C_values = [0.1, 1.0, 10.0, 0.1, 1.0, 10.0]
     
     for i in range(len(K_values)):
         K = K_values[i]
