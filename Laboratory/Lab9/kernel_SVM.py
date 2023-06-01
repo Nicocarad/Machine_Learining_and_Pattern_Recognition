@@ -5,7 +5,6 @@ import scipy
 def mCol(v):
     return v.reshape((v.size, 1))
 
-
 def mRow(array):
     return array.reshape((1,array.size))
 
@@ -57,10 +56,8 @@ def compute_lagrangian_wrapper(H_hat):
 
 
 
-
 def polynomial_SVM(K,const,deg,C,DTR,LTR,DTE):
-    
-        
+       
     #Compute H_hat
     Z = numpy.zeros(LTR.shape)
     Z = 2*LTR -1
@@ -87,37 +84,102 @@ def polynomial_SVM(K,const,deg,C,DTR,LTR,DTE):
     
     return scores
     
+    
+def RBF_SVM(K,gamma,C,DTR,LTR,DTE):
+    
+    #Compute H_hat
+    Z = numpy.zeros(LTR.shape)
+    Z = 2*LTR -1
+    
+    RBF_kern_DTR = numpy.zeros((DTR.shape[1], DTR.shape[1]))
+    for i in range(DTR.shape[1]):
+        for j in range(DTR.shape[1]):
+            RBF_kern_DTR[i, j] = numpy.exp(-gamma * (numpy.linalg.norm(DTR[:, i] - DTR[:, j]) ** 2)) + K **2
+            
+    H_hat = mCol(Z) * mRow(Z) * RBF_kern_DTR
+    #Compute Lagrangian
+    compute_lagr= compute_lagrangian_wrapper(H_hat)
+    
+    
+    # Use scipy.optimize.fmin_l_bfgs_b
+    x0=numpy.zeros(LTR.size) #alpha
+    
+    bounds_list = [(0,C)] * LTR.size
+    (alpha_star,f,d)= scipy.optimize.fmin_l_bfgs_b(compute_lagr, approx_grad=False, x0=x0, bounds=bounds_list, factr=1.0)
+    
+    RBF_kern_DTE = numpy.zeros((DTR.shape[1], DTE.shape[1]))
+    for i in range(DTR.shape[1]):
+        for j in range(DTE.shape[1]):
+            RBF_kern_DTE[i, j] = numpy.exp(-gamma * (numpy.linalg.norm(DTR[:, i] - DTE[:, j]) ** 2)) + K * K
 
+            
+    scores = numpy.sum(numpy.dot(alpha_star * mRow(Z), RBF_kern_DTE), axis=0)
+    
+    dual_obj = f
+    
+    print("DUAL LOSS: ", -dual_obj)
+    
+    
+    return scores
+    
+    
+    
+    
+    
 if __name__ == '__main__':
     
     D, L = load_iris_binary()
     (DTR, LTR), (DTE, LTE) = split_db_2to1(D, L)
 
-    print(" K = 0.0 | Poly (d=2, c=0)")   
+    print( "POLYNOMIAL - SUPPORT VECTOR MACHINES\n")
+
+    print(" K = 0.0 | C = 1 | Poly (d=2, c=0)")   
     S = polynomial_SVM(0.0,0,2,1.0,DTR,LTR,DTE)
     Predicted_Labels = (S > 0).astype(int)
     acc, err = acc_err_evaluate(Predicted_Labels, LTE)
-        
     print("ERROR RATE: ", round(err, 1), "%\n")
     
     
-    print(" K = 1.0 | Poly (d=2, c=0)")   
+    print(" K = 1.0 | C = 1 | Poly (d=2, c=0)")   
     S = polynomial_SVM(1.0,0,2,1.0,DTR,LTR,DTE)
     Predicted_Labels = (S > 0).astype(int)
     acc, err = acc_err_evaluate(Predicted_Labels, LTE)
-        
     print("ERROR RATE: ", round(err, 1), "%\n")
     
-    print(" K = 0.0 | Poly (d=2, c=1)")   
+    print(" K = 0.0 | C = 1 | Poly (d=2, c=1)")   
     S = polynomial_SVM(0.0,1,2,1.0,DTR,LTR,DTE)
     Predicted_Labels = (S > 0).astype(int)
-    acc, err = acc_err_evaluate(Predicted_Labels, LTE)
-        
+    acc, err = acc_err_evaluate(Predicted_Labels, LTE)  
     print("ERROR RATE: ", round(err, 1), "%\n")
     
-    print(" K = 1.0 | Poly (d=2, c=1)")   
+    print(" K = 1.0 | C = 1 | Poly (d=2, c=1)")   
     S = polynomial_SVM(1.0,1,2,1.0,DTR,LTR,DTE)
     Predicted_Labels = (S > 0).astype(int)
-    acc, err = acc_err_evaluate(Predicted_Labels, LTE)
-        
+    acc, err = acc_err_evaluate(Predicted_Labels, LTE)  
+    print("ERROR RATE: ", round(err, 1), "%\n")
+    
+    print("RADIAL BASIS FUNCTION - SUPPORT VECTOR MACHINES\n")
+    
+    print(" K = 0.0 | C = 1.0 | RBF (gamma = 1.0)")   
+    S = RBF_SVM(0.0,1.0,1.0,DTR,LTR,DTE)
+    Predicted_Labels = (S > 0).astype(int)
+    acc, err = acc_err_evaluate(Predicted_Labels, LTE)   
+    print("ERROR RATE: ", round(err, 1), "%\n")
+    
+    print(" K = 0.0 | C = 1.0 | RBF (gamma = 10.0)")   
+    S = RBF_SVM(0.0,10.0,1.0,DTR,LTR,DTE)
+    Predicted_Labels = (S > 0).astype(int)
+    acc, err = acc_err_evaluate(Predicted_Labels, LTE)   
+    print("ERROR RATE: ", round(err, 1), "%\n")
+    
+    print(" K = 1.0 | C = 1.0 | RBF (gamma = 1.0)")   
+    S = RBF_SVM(1.0,1.0,1.0,DTR,LTR,DTE)
+    Predicted_Labels = (S > 0).astype(int)
+    acc, err = acc_err_evaluate(Predicted_Labels, LTE)   
+    print("ERROR RATE: ", round(err, 1), "%\n")
+    
+    print(" K = 1.0 | C = 1.0 | RBF (gamma = 10.0)")   
+    S = RBF_SVM(1.0,10.0,1.0,DTR,LTR,DTE)
+    Predicted_Labels = (S > 0).astype(int)
+    acc, err = acc_err_evaluate(Predicted_Labels, LTE)   
     print("ERROR RATE: ", round(err, 1), "%\n")
