@@ -57,28 +57,16 @@ def compute_lagrangian_wrapper(H_hat):
 
 
 
-def compute_duality_gap(w_hat_star, C, Z, D_hat, dual_obj):
 
-    term1 = 0.5 * numpy.sum(w_hat_star ** 2)   
-    term2 = 1 - ( Z.T * numpy.dot(w_hat_star.T, D_hat) )
-    term3= C * numpy.sum(numpy.maximum(0, term2))
-    primal_obj = term1 + term3
+def polynomial_SVM(K,const,deg,C,DTR,LTR,DTE):
     
-    duality_gap = primal_obj + dual_obj
-    
-    return primal_obj,numpy.abs(duality_gap)
-
-def linear_SVM(K,C,DTR,LTR,DTE):
-    
-    #Creating D_hat= [xi, k] 
-    D_hat = numpy.vstack([DTR, K * numpy.ones((1, DTR.shape[1]))])
         
     #Compute H_hat
-    G_hat = numpy.dot(D_hat.T,D_hat)
     Z = numpy.zeros(LTR.shape)
     Z = 2*LTR -1
-    Z = mCol(Z)
-    H_hat = mCol(Z) * mRow(Z) * G_hat # For each row i and column j of H_hat, take the dot product of the ith row of Z with the jth column of Z.T. This gives a scalar value.
+    
+    poly_kern_DTR = (numpy.dot(DTR.T,DTR) + const)** deg + K**2
+    H_hat = mCol(Z) * mRow(Z) * poly_kern_DTR
     #Compute Lagrangian
     compute_lagr= compute_lagrangian_wrapper(H_hat)
     
@@ -87,24 +75,15 @@ def linear_SVM(K,C,DTR,LTR,DTE):
     x0=numpy.zeros(LTR.size) #alpha
     
     bounds_list = [(0,C)] * LTR.size
-    (x,f,d)= scipy.optimize.fmin_l_bfgs_b(compute_lagr, approx_grad=False, x0=x0, bounds=bounds_list, factr=1.0)
+    (alpha_star,f,d)= scipy.optimize.fmin_l_bfgs_b(compute_lagr, approx_grad=False, x0=x0, bounds=bounds_list, factr=1.0)
     
-    # From Dual solution to Primal solution
-    w_hat_star = numpy.sum( mCol(x) * mCol(Z) * D_hat.T,  axis=0 )
+    poly_kern_DTE = (numpy.dot(DTR.T, DTE) + const)** deg + K ** 2
+    scores = numpy.sum(numpy.dot(alpha_star * mRow(Z), poly_kern_DTE), axis=0)
     
-    # Extract terms and compute scores
-    w_star = w_hat_star[0:-1] 
-    b_star = w_hat_star[-1] * K
-
-    scores = numpy.dot(w_star.T, DTE) + b_star
-    
-    primal_obj,duality_gap = compute_duality_gap(w_hat_star, C, Z, D_hat,f)
     dual_obj = f
     
-   
-    print("PRIMAL LOSS: ", primal_obj)
     print("DUAL LOSS: ", -dual_obj)
-    print("DUALITY GAP: ", duality_gap)
+    
     
     return scores
     
@@ -113,25 +92,32 @@ if __name__ == '__main__':
     
     D, L = load_iris_binary()
     (DTR, LTR), (DTE, LTE) = split_db_2to1(D, L)
-    
-    K_values = [1, 1, 1, 10, 10, 10]
-    C_values = [0.1, 1.0, 10.0, 0.1, 1.0, 10.0]
-    
-    for i in range(len(K_values)):
-        K = K_values[i]
-        C = C_values[i]
-        print(">>>> TEST {} <<<<".format(i+1))
-        print("K:", K)
-        print("C:", C)
-        
-        S = linear_SVM(K, C, DTR, LTR, DTE)
-        Predicted_Labels = (S > 0).astype(int)
-        acc, err = acc_err_evaluate(Predicted_Labels, LTE)
-        
-        print("ERROR RATE: ", round(err, 1), "%")
-        
-        
-    
-     
 
+    print(" K = 0.0 | Poly (d=2, c=0)")   
+    S = polynomial_SVM(0.0,0,2,1.0,DTR,LTR,DTE)
+    Predicted_Labels = (S > 0).astype(int)
+    acc, err = acc_err_evaluate(Predicted_Labels, LTE)
+        
+    print("ERROR RATE: ", round(err, 1), "%\n")
     
+    
+    print(" K = 1.0 | Poly (d=2, c=0)")   
+    S = polynomial_SVM(1.0,0,2,1.0,DTR,LTR,DTE)
+    Predicted_Labels = (S > 0).astype(int)
+    acc, err = acc_err_evaluate(Predicted_Labels, LTE)
+        
+    print("ERROR RATE: ", round(err, 1), "%\n")
+    
+    print(" K = 0.0 | Poly (d=2, c=1)")   
+    S = polynomial_SVM(0.0,1,2,1.0,DTR,LTR,DTE)
+    Predicted_Labels = (S > 0).astype(int)
+    acc, err = acc_err_evaluate(Predicted_Labels, LTE)
+        
+    print("ERROR RATE: ", round(err, 1), "%\n")
+    
+    print(" K = 1.0 | Poly (d=2, c=1)")   
+    S = polynomial_SVM(1.0,1,2,1.0,DTR,LTR,DTE)
+    Predicted_Labels = (S > 0).astype(int)
+    acc, err = acc_err_evaluate(Predicted_Labels, LTE)
+        
+    print("ERROR RATE: ", round(err, 1), "%\n")
