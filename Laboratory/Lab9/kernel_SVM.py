@@ -130,29 +130,29 @@ if __name__ == '__main__':
     
     D, L = load_iris_binary()
     (DTR, LTR), (DTE, LTE) = split_db_2to1(D, L)
-
+    
     print( "POLYNOMIAL - SUPPORT VECTOR MACHINES\n")
-
-    print(" K = 0.0 | C = 1 | Poly (d=2, c=0)")   
+    #polynomial_SVM(K,const,deg,C,DTR,LTR,DTE)
+    print("1) K = 0.0 | C = 1 | Poly (d=2, c=0)")   
     S = polynomial_SVM(0.0,0,2,1.0,DTR,LTR,DTE)
     Predicted_Labels = (S > 0).astype(int)
     acc, err = acc_err_evaluate(Predicted_Labels, LTE)
     print("ERROR RATE: ", round(err, 1), "%\n")
     
     
-    print(" K = 1.0 | C = 1 | Poly (d=2, c=0)")   
+    print("2) K = 1.0 | C = 1 | Poly (d=2, c=0)")   
     S = polynomial_SVM(1.0,0,2,1.0,DTR,LTR,DTE)
     Predicted_Labels = (S > 0).astype(int)
     acc, err = acc_err_evaluate(Predicted_Labels, LTE)
     print("ERROR RATE: ", round(err, 1), "%\n")
     
-    print(" K = 0.0 | C = 1 | Poly (d=2, c=1)")   
+    print("3) K = 0.0 | C = 1 | Poly (d=2, c=1)")   
     S = polynomial_SVM(0.0,1,2,1.0,DTR,LTR,DTE)
     Predicted_Labels = (S > 0).astype(int)
     acc, err = acc_err_evaluate(Predicted_Labels, LTE)  
     print("ERROR RATE: ", round(err, 1), "%\n")
     
-    print(" K = 1.0 | C = 1 | Poly (d=2, c=1)")   
+    print("4) K = 1.0 | C = 1 | Poly (d=2, c=1)")   
     S = polynomial_SVM(1.0,1,2,1.0,DTR,LTR,DTE)
     Predicted_Labels = (S > 0).astype(int)
     acc, err = acc_err_evaluate(Predicted_Labels, LTE)  
@@ -160,25 +160,25 @@ if __name__ == '__main__':
     
     print("RADIAL BASIS FUNCTION - SUPPORT VECTOR MACHINES\n")
     
-    print(" K = 0.0 | C = 1.0 | RBF (gamma = 1.0)")   
+    print("1) K = 0.0 | C = 1.0 | RBF (gamma = 1.0)")   
     S = RBF_SVM(0.0,1.0,1.0,DTR,LTR,DTE)
     Predicted_Labels = (S > 0).astype(int)
     acc, err = acc_err_evaluate(Predicted_Labels, LTE)   
     print("ERROR RATE: ", round(err, 1), "%\n")
     
-    print(" K = 0.0 | C = 1.0 | RBF (gamma = 10.0)")   
+    print("2) K = 0.0 | C = 1.0 | RBF (gamma = 10.0)")   
     S = RBF_SVM(0.0,10.0,1.0,DTR,LTR,DTE)
     Predicted_Labels = (S > 0).astype(int)
     acc, err = acc_err_evaluate(Predicted_Labels, LTE)   
     print("ERROR RATE: ", round(err, 1), "%\n")
     
-    print(" K = 1.0 | C = 1.0 | RBF (gamma = 1.0)")   
+    print("3) K = 1.0 | C = 1.0 | RBF (gamma = 1.0)")   
     S = RBF_SVM(1.0,1.0,1.0,DTR,LTR,DTE)
     Predicted_Labels = (S > 0).astype(int)
     acc, err = acc_err_evaluate(Predicted_Labels, LTE)   
     print("ERROR RATE: ", round(err, 1), "%\n")
     
-    print(" K = 1.0 | C = 1.0 | RBF (gamma = 10.0)")   
+    print("4) K = 1.0 | C = 1.0 | RBF (gamma = 10.0)")   
     S = RBF_SVM(1.0,10.0,1.0,DTR,LTR,DTE)
     Predicted_Labels = (S > 0).astype(int)
     acc, err = acc_err_evaluate(Predicted_Labels, LTE)   
